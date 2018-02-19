@@ -8,7 +8,7 @@ import vlc
 import sys
 from os.path import expanduser
 
-
+# to set_artists definition	
 def set_artists(x,artists):
 	a = x.replace('-',' ').strip().split(' ')
 	a = list(map(str.lower,a))
@@ -17,9 +17,16 @@ def set_artists(x,artists):
 			return artists[k]
 	return "Unknown"
 
+# main definition
+
 def main():
+	
+	# set your media_path here
 	media_path = "/../../media/dangar/Important/songs/eng collection/lyrics video/" 
+	
 	home = expanduser("~")
+	
+	# if your song details are not there then it will create new data file in csv
 	try:
 		local_songs_df = pd.read_csv('local_songs_data.csv')
 	except:
@@ -29,7 +36,7 @@ def main():
 		local_songs_df['ratings'] = 0
 
 
-
+	# artists dictionary
 	artists = {'linkin':'Linkin Park','coldplay':'Coldplay','akon':'Akon','garrix':'Martin Garrix',
 			   'avicii':'Avicii','script':'The Script','minaj':'Nicki Minaj','bruno':'Bruno Mars',
 			   'bebe':'Bebe Rexha','calvin':'Calvin Harris','camila':'Camila Cabello','charlie':'Charlie Puth',
@@ -55,26 +62,6 @@ def main():
 
 	os.chdir(media_path)
 
-
-	# In[14]:
-
-
-	# def play(x):
-	#     player = vlc.MediaPlayer(x)
-	#     player.play()
-	#     print("Playing : {} ".format(x[:-4]))
-	#     x1,x2=0,1
-	#     while x1!=x2:
-	#         x1 = player.get_time()
-	#         time.sleep(2)
-	#         x2 = player.get_time()
-	#     c = int(input("Rate This Song in 1 to 10 : "))
-		
-	#     print("{} rank is saved \n Thank you for your support".format(c))
-	#     print('----------------------*****----------------------')
-	#     player.stop()
-		
-
 	#local_songs_df.song_name.apply(play)
 	#song_count = int(input("There are {} songs in your library\nHow many songs May I recommend you?".format(len(local_songs_df))))
 	j = 0
@@ -82,15 +69,6 @@ def main():
 		try:
 			j+=1
 			repeat = 'yes'
-			# player = vlc.MediaPlayer(x)
-			# player.play()
-			# print("{}) song \nPlaying : {} ".format(j,x[:-4]))
-			# x1,x2=0,1
-			# while x1!=x2:
-			# 	x1 = player.get_time()
-			# 	time.sleep(2)
-			# 	x2 = player.get_time()
-			# repeat = input('Want to repeat this song ? (yes/no) :> ')
 			while repeat=='yes' or repeat=='Yes':
 				player = vlc.MediaPlayer(x)
 				player.play()
@@ -121,7 +99,7 @@ def main():
 			print('Done!!!!')
 			sys.exit()
 
-
+		# saving csv file 
 		local_songs_df.to_csv(home+'/local_songs_data.csv')
 
 if __name__=='__main__':

@@ -25,15 +25,6 @@ def main():
 	media_path = "/../../media/dangar/Important/songs/eng collection/lyrics video/" 
 	
 	home = expanduser("~")
-	
-	# if your song details are not there then it will create new data file in csv
-	try:
-		local_songs_df = pd.read_csv('local_songs_data.csv')
-	except:
-		local_songs_df = pd.DataFrame()
-		local_songs_df['song_name'] = os.listdir(media_path)
-		local_songs_df['listen_counter'] = 0
-		local_songs_df['ratings'] = 0
 
 
 	# artists dictionary
@@ -47,14 +38,41 @@ def main():
 			   'maroon' : 'Maroon 5','nf':'NF','pitbull':'Pitbull','gomez':'Selena Gomez','sia':'Sia','chainsmokers':'The Chainsmokers',
 			   'score':'The Score','pilots':'Twenty One Pilots','zayn':'ZAYN'
 			  }
+		# if your song details are not there then it will create new data file in csv
+	try:
+		local_songs_df = pd.read_csv('local_songs_data.csv')
+		local_songs_df = local_songs_df[local_songs_df.columns[-5:]]
+		drop = [x for x in local_songs_df.song_name.values if x not in os.listdir(media_path)]
+		add = [x for x in os.listdir(media_path) if x not in local_songs_df.song_name.values]
+		if len(drop)!=0 | len(add)!=0:
+			print("We Got {} new songs!!".format(len(add)))
+			print("updating your playlist....")
+			local_songs_df1 = pd.DataFrame()
+			local_songs_df1['song_name'] = os.listdir(media_path)
+			local_songs_df1['listen_counter'] = 0
+			local_songs_df1['ratings'] = 0
+			local_songs_df1['artists'] =local_songs_df1.song_name.apply(lambda x: set_artists(x,artists))
+			local_songs_df1['score'] = 0
+			# drop = [x for x in local_songs_df.song_name.values if x not in local_songs_df1.song_name.values]
+			local_songs_df.drop(labels=local_songs_df[local_songs_df.song_name.isin(drop)].index , inplace=True)
+			# add =  [x for x in local_songs_df1.song_name.values if x not in local_songs_df.song_name.values]
+			add_this = local_songs_df1[local_songs_df1.song_name.isin(add)]
+			local_songs_df = pd.concat([local_songs_df, add_this], ignore_index=True,verify_integrity=True)
+			local_songs_df.drop_duplicates(subset=['song_name'],inplace=True)
+			local_songs_df.reset_index(inplace=True)
+			local_songs_df.drop('index',axis=1,inplace=True)
+			time.sleep(3)
+		
 
-
-
-
-	local_songs_df['artists'] =local_songs_df.song_name.apply(lambda x: set_artists(x,artists))
-	local_songs_df.listen_counter.fillna(value=0,inplace=True)
-	local_songs_df.ratings.fillna(value=0,inplace=True)
-	local_songs_df['score'] = local_songs_df.ratings*0.67 + local_songs_df.listen_counter * 0.33
+	except:
+		local_songs_df = pd.DataFrame()
+		local_songs_df['song_name'] = os.listdir(media_path)
+		local_songs_df['listen_counter'] = 0
+		local_songs_df['ratings'] = 0
+		local_songs_df['artists'] =local_songs_df.song_name.apply(lambda x: set_artists(x,artists))
+		local_songs_df1['score'] = 0
+	
+	# local_songs_df['score'] = local_songs_df.ratings*0.67 + local_songs_df.listen_counter * 0.33
 
 	local_songs_df.sort_values(by='score',ascending=False,inplace=True)
 
@@ -83,6 +101,7 @@ def main():
 					local_songs_df.loc[local_songs_df.song_name == x,'ratings'] = c
 					print("{} rank is saved \n Thank you for your support".format(c))
 				local_songs_df.loc[local_songs_df.song_name == x,'listen_counter'] += 1
+				local_songs_df['score'] = local_songs_df.ratings*0.67 + local_songs_df.listen_counter * 0.33
 				print('You have listened this song {} times'.format(int(local_songs_df.loc[local_songs_df.song_name == x,'listen_counter'])))
 				print('----------------------*****----------------------')
 				print()

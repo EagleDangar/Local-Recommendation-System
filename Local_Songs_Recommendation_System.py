@@ -7,7 +7,7 @@ import time
 import vlc
 import sys
 from os.path import expanduser
-
+from termcolor import colored
 # to set_artists definition	
 def set_artists(x,artists):
 	a = x.replace('-',' ').strip().split(' ')
@@ -18,6 +18,8 @@ def set_artists(x,artists):
 	return "Unknown"
 
 # main definition
+def clear():
+    os.system( 'clear' )
 
 def main():
 	
@@ -45,8 +47,8 @@ def main():
 		drop = [x for x in local_songs_df.song_name.values if x not in os.listdir(media_path)]
 		add = [x for x in os.listdir(media_path) if x not in local_songs_df.song_name.values]
 		if len(drop)!=0 | len(add)!=0:
-			print("We Got {} new songs!!".format(len(add)))
-			print("updating your playlist....")
+			print(colored("\nWe Got {} new songs!!".format(len(add)),'red'))
+			print(colored("updating your playlist....","green"))
 			local_songs_df1 = pd.DataFrame()
 			local_songs_df1['song_name'] = os.listdir(media_path)
 			local_songs_df1['listen_counter'] = 0
@@ -84,13 +86,15 @@ def main():
 	#song_count = int(input("There are {} songs in your library\nHow many songs May I recommend you?".format(len(local_songs_df))))
 	j = 0
 	for x in local_songs_df.song_name:
+		# time.sleep(2)
+		# clear()
 		try:
 			j+=1
 			repeat = 'yes'
 			while repeat=='yes' or repeat=='Yes':
 				player = vlc.MediaPlayer(x)
 				player.play()
-				print("{}) song \nPlaying : {} ".format(j,x[:-4]))
+				print(colored("\r{} song \nPlaying : {} ".format(j,x[:-4]),"blue"))
 				x3,x4=0,1
 				while x3!=x4:
 					x3 = player.get_time()
@@ -99,27 +103,29 @@ def main():
 				if (local_songs_df.loc[local_songs_df.song_name == x,'ratings']==0).bool():
 					c = int(input("Rate This Song in 1 to 10 : "))
 					local_songs_df.loc[local_songs_df.song_name == x,'ratings'] = c
-					print("{} rank is saved \n Thank you for your support".format(c))
+					print(colored("{} rank is saved \n Thank you for your support".format(c),"green"))
 				local_songs_df.loc[local_songs_df.song_name == x,'listen_counter'] += 1
 				local_songs_df['score'] = local_songs_df.ratings*0.67 + local_songs_df.listen_counter * 0.33
 				print('You have listened this song {} times'.format(int(local_songs_df.loc[local_songs_df.song_name == x,'listen_counter'])))
 				print('----------------------*****----------------------')
 				print()
 				player.stop()
-				repeat = input('Want to repeat this song ? (yes/no) :> ')
+				repeat = input(colored(' Want to repeat this song ? (yes/no) :> ',"blue"))
 				if repeat=='yes':
 					print(' Yeah !! You like this song too much')
 		except (KeyboardInterrupt, SystemExit):
 			local_songs_df.to_csv(home+'/local_songs_data.csv')
-			print('Want to Quit? \n wait let me save the data')
-			print('Saving....')
+			# time.sleep(2)
+			# clear()
+			print(colored('\r Want to Quit? \n Wait let me save the data',"red"))
+			print(colored('\r Saving....',"red"))
 			time.sleep(5)
 			player.stop()
-			print('Done!!!!')
+			print(colored('\r Done!!!!',"green"))
 			sys.exit()
 
-		# saving csv file 
-		local_songs_df.to_csv(home+'/local_songs_data.csv')
+	# saving csv file 
+	local_songs_df.to_csv(home+'/local_songs_data.csv',index=False)
 
 if __name__=='__main__':
 	main()
